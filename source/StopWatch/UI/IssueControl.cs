@@ -19,10 +19,12 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
 namespace StopWatch
 {
     internal class IssueControl : UserControl
     {
+
         #region public members
         public string IssueKey
         {
@@ -37,7 +39,6 @@ namespace StopWatch
                 UpdateSummary();
             }
         }
-
 
         public WatchTimer WatchTimer { get; private set; }
 
@@ -58,7 +59,6 @@ namespace StopWatch
                     cbJira.Items.Add(new CBIssueItem(issue.Key, issue.Fields.Summary));
             }
         }
-
 
         public string Comment { get; set; }
         public EstimateUpdateMethods EstimateUpdateMethod { get; set; }
@@ -282,11 +282,11 @@ namespace StopWatch
             this.cbJira.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable;
             this.cbJira.DropDownHeight = 90;
             this.cbJira.DropDownWidth = 488;
-            this.cbJira.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F);
+            this.cbJira.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.cbJira.IntegralHeight = false;
-            this.cbJira.Location = new System.Drawing.Point(12, 5);
+            this.cbJira.Location = new System.Drawing.Point(3, 3);
             this.cbJira.Name = "cbJira";
-            this.cbJira.Size = new System.Drawing.Size(155, 28);
+            this.cbJira.Size = new System.Drawing.Size(155, 24);
             this.cbJira.TabIndex = 0;
             this.cbJira.ValueMember = "Key";
             this.cbJira.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.cbJira_DrawItem);
@@ -298,11 +298,11 @@ namespace StopWatch
             // 
             // tbTime
             // 
-            this.tbTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.3F);
-            this.tbTime.Location = new System.Drawing.Point(256, 5);
+            this.tbTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.tbTime.Location = new System.Drawing.Point(682, 3);
             this.tbTime.Name = "tbTime";
             this.tbTime.ReadOnly = true;
-            this.tbTime.Size = new System.Drawing.Size(107, 28);
+            this.tbTime.Size = new System.Drawing.Size(107, 23);
             this.tbTime.TabIndex = 3;
             this.tbTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.tbTime.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbTime_KeyDown);
@@ -313,19 +313,20 @@ namespace StopWatch
             // 
             this.lblSummary.AutoEllipsis = true;
             this.lblSummary.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSummary.Location = new System.Drawing.Point(11, 36);
+            this.lblSummary.Location = new System.Drawing.Point(164, 6);
             this.lblSummary.Name = "lblSummary";
-            this.lblSummary.Size = new System.Drawing.Size(482, 17);
+            this.lblSummary.Size = new System.Drawing.Size(452, 17);
             this.lblSummary.TabIndex = 6;
+            this.lblSummary.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lblSummary_MouseDown);
             this.lblSummary.MouseUp += new System.Windows.Forms.MouseEventHandler(this.lblSummary_MouseUp);
             // 
             // btnRemoveIssue
             // 
             this.btnRemoveIssue.Enabled = false;
             this.btnRemoveIssue.Image = global::StopWatch.Properties.Resources.delete24;
-            this.btnRemoveIssue.Location = new System.Drawing.Point(465, 3);
+            this.btnRemoveIssue.Location = new System.Drawing.Point(852, 3);
             this.btnRemoveIssue.Name = "btnRemoveIssue";
-            this.btnRemoveIssue.Size = new System.Drawing.Size(32, 32);
+            this.btnRemoveIssue.Size = new System.Drawing.Size(24, 24);
             this.btnRemoveIssue.TabIndex = 7;
             this.ttIssue.SetToolTip(this.btnRemoveIssue, "Remove issue row (CTRL-DEL)");
             this.btnRemoveIssue.UseVisualStyleBackColor = true;
@@ -335,9 +336,9 @@ namespace StopWatch
             // 
             this.btnPostAndReset.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnPostAndReset.Image = global::StopWatch.Properties.Resources.posttime26;
-            this.btnPostAndReset.Location = new System.Drawing.Point(369, 3);
+            this.btnPostAndReset.Location = new System.Drawing.Point(794, 3);
             this.btnPostAndReset.Name = "btnPostAndReset";
-            this.btnPostAndReset.Size = new System.Drawing.Size(32, 32);
+            this.btnPostAndReset.Size = new System.Drawing.Size(24, 24);
             this.btnPostAndReset.TabIndex = 4;
             this.ttIssue.SetToolTip(this.btnPostAndReset, "Submit worklog to Jira and reset timer (CTRL-L)");
             this.btnPostAndReset.UseVisualStyleBackColor = true;
@@ -348,9 +349,9 @@ namespace StopWatch
             // 
             this.btnReset.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnReset.Image = global::StopWatch.Properties.Resources.reset24;
-            this.btnReset.Location = new System.Drawing.Point(429, 3);
+            this.btnReset.Location = new System.Drawing.Point(824, 3);
             this.btnReset.Name = "btnReset";
-            this.btnReset.Size = new System.Drawing.Size(32, 32);
+            this.btnReset.Size = new System.Drawing.Size(24, 24);
             this.btnReset.TabIndex = 5;
             this.ttIssue.SetToolTip(this.btnReset, "Reset timer (CTRL-R)");
             this.btnReset.UseVisualStyleBackColor = true;
@@ -361,9 +362,9 @@ namespace StopWatch
             // 
             this.btnStartStop.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnStartStop.Image = global::StopWatch.Properties.Resources.play26;
-            this.btnStartStop.Location = new System.Drawing.Point(220, 3);
+            this.btnStartStop.Location = new System.Drawing.Point(653, 3);
             this.btnStartStop.Name = "btnStartStop";
-            this.btnStartStop.Size = new System.Drawing.Size(32, 32);
+            this.btnStartStop.Size = new System.Drawing.Size(24, 24);
             this.btnStartStop.TabIndex = 2;
             this.ttIssue.SetToolTip(this.btnStartStop, "Start/stop timer (CTRL-P)");
             this.btnStartStop.UseVisualStyleBackColor = true;
@@ -374,9 +375,9 @@ namespace StopWatch
             // 
             this.btnOpen.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnOpen.Image = global::StopWatch.Properties.Resources.openbrowser26;
-            this.btnOpen.Location = new System.Drawing.Point(168, 3);
+            this.btnOpen.Location = new System.Drawing.Point(622, 3);
             this.btnOpen.Name = "btnOpen";
-            this.btnOpen.Size = new System.Drawing.Size(32, 32);
+            this.btnOpen.Size = new System.Drawing.Size(24, 24);
             this.btnOpen.TabIndex = 1;
             this.ttIssue.SetToolTip(this.btnOpen, "Open issue in browser (CTRL-O)");
             this.btnOpen.UseVisualStyleBackColor = true;
@@ -385,7 +386,7 @@ namespace StopWatch
             // 
             // IssueControl
             // 
-            this.BackColor = System.Drawing.SystemColors.Window;
+            this.BackColor = System.Drawing.Color.White;
             this.Controls.Add(this.btnRemoveIssue);
             this.Controls.Add(this.btnPostAndReset);
             this.Controls.Add(this.lblSummary);
@@ -395,7 +396,8 @@ namespace StopWatch
             this.Controls.Add(this.btnOpen);
             this.Controls.Add(this.cbJira);
             this.Name = "IssueControl";
-            this.Size = new System.Drawing.Size(517, 58);
+            this.Size = new System.Drawing.Size(880, 30);
+            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.IssueControl_MouseDown);
             this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.IssueControl_MouseUp);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -806,6 +808,16 @@ namespace StopWatch
         {
             SetSelected();
             UpdateOutput(true);
+        }
+
+        private void lblSummary_MouseDown(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void IssueControl_MouseDown(object sender, MouseEventArgs e)
+        {
+
         }
     }
 }

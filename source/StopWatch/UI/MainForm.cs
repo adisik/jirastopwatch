@@ -22,14 +22,75 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace StopWatch
 {
     public partial class MainForm : Form
     {
+        public const int WM_NCLBUTTONDOWN = 0xA1;
+        public const int HT_CAPTION = 0x2;
+
+        [DllImportAttribute("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd,
+                         int Msg, int wParam, int lParam);
+        [DllImportAttribute("user32.dll")]
+        public static extern bool ReleaseCapture();
+
+        public bool formOnTop = false;
+        public bool mouseOnForm = false;
+
+        #region //Mouse Event
+
+        public delegate void MouseMovedEvent();
+        public delegate void MouseLeaveEvent();
+
+        public class GlobalMouseHandler : IMessageFilter
+        {
+            private const int WM_MOUSEMOVE = 0x0200;
+            private const int WM_MOUSELEAVE = 0x02A3;
+
+            public event MouseMovedEvent MouseMoved;
+            public event MouseLeaveEvent MouseLeave;
+
+            #region IMessageFilter Members
+
+            public bool PreFilterMessage(ref Message m)
+            {
+                if (m.Msg == WM_MOUSEMOVE)
+                {
+                    if (MouseMoved != null)
+                    {
+                        MouseMoved();
+                    }
+                }
+                if (m.Msg == WM_MOUSELEAVE)
+                {
+                    if (MouseLeave != null)
+                    {
+                        MouseLeave();
+                    }
+                }
+                // Always allow message to continue to the next filter control
+                return false;
+            }
+
+            #endregion
+        }
+
+        #endregion
+
+
         #region public methods
         public MainForm()
         {
+            //Mouse
+            GlobalMouseHandler gmh = new GlobalMouseHandler();
+            gmh.MouseMoved += new MouseMovedEvent(TheMouseMoved);
+            gmh.MouseLeave += new MouseLeaveEvent(TheMouseLeave);
+            Application.AddMessageFilter(gmh);
+            //Mouse
+
             settings = Settings.Instance;
             if (!settings.Load())
                 MessageBox.Show(string.Format("An error occurred while loading settings for Jira StopWatch. Your configuration file has most likely become corrupted.{0}{0}And older configuration file has been loaded instead, so please verify your settings.", Environment.NewLine), "Jira StopWatch");
@@ -63,6 +124,8 @@ namespace StopWatch
             // First run should be almost immediately after start
             ticker.Interval = firstDelay;
             ticker.Tick += ticker_Tick;
+
+            
         }
 
 
@@ -376,7 +439,7 @@ namespace StopWatch
                 i++;
             }
 
-            this.ClientSize = new Size(pBottom.Width, this.settings.IssueCount * issueControls.Last().Height + pMain.Top + pBottom.Height);
+            this.ClientSize = new Size(pMain.Width, this.settings.IssueCount * issueControls.Last().Height + pMain.Top);
 
             var workingArea = Screen.FromControl(this).WorkingArea;
             if (this.Height > workingArea.Height)
@@ -385,8 +448,8 @@ namespace StopWatch
             if (this.Bottom > workingArea.Bottom)
                 this.Top = workingArea.Bottom - this.Height;
             
-            pMain.Height = ClientSize.Height - pTop.Height - pBottom.Height;
-            pBottom.Top = ClientSize.Height - pBottom.Height;
+            pMain.Height = ClientSize.Height - pTop.Height;
+            //pBottom.Top = ClientSize.Height;
 
             this.TopMost = this.settings.AlwaysOnTop;
 
@@ -898,6 +961,128 @@ namespace StopWatch
         private void pbHelp_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("http://jirastopwatch.com/doc");
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            SaveSettingsAndIssueStates();
+            this.Close();
+        }
+
+        private void pTop_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                ReleaseCapture();
+                SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+                timerShow.Enabled = false;
+                formOnTop = false;
+            }
+        }
+
+        private void lblConnectionStatus_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                ReleaseCapture();
+                SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+            }
+        }
+
+        private void lblActiveFilter_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                ReleaseCapture();
+                SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            string screenWidth = Screen.PrimaryScreen.Bounds.Width.ToString();
+            string screenHeight = Screen.PrimaryScreen.Bounds.Height.ToString();
+            //MessageBox.Show("Resolution: " + screenWidth + "x" + screenHeight);
+            int x = Screen.AllScreens[1].WorkingArea.Location.X;
+            //int y = (Screen.AllScreens[1].WorkingArea.Location.Y - this.Size.Width) / 2;
+            int y = Screen.AllScreens[1].WorkingArea.Location.Y;
+            //this.Location = new Point(x,y);
+            //Screen.AllScreens[1].WorkingArea.Location;
+            var primaryDisplay = Screen.AllScreens.ElementAtOrDefault(0);
+            var extendedDisplay = Screen.AllScreens.FirstOrDefault(s => s != primaryDisplay) ?? primaryDisplay;
+
+            if (!timerShow.Enabled)
+            {
+                this.Left = extendedDisplay.WorkingArea.Left + (extendedDisplay.Bounds.Size.Width / 2) - (this.Size.Width / 2);
+                this.Top = extendedDisplay.WorkingArea.Top - pTop.Height - (this.settings.IssueCount - 1) * this.issueControls.Last().Height;
+                timerShow.Enabled = true;
+                timerShow.Start();    
+            }
+            else
+            {
+
+            }
+            //timerShow.Enabled = true;
+            //timerShow.Start();
+            formOnTop = true;
+            mouseOnForm = false;
+            
+
+        }
+
+        private void FormSlideUp()
+        {
+            var primaryDisplay = Screen.AllScreens.ElementAtOrDefault(0);
+            var extendedDisplay = Screen.AllScreens.FirstOrDefault(s => s != primaryDisplay) ?? primaryDisplay;
+            int size = pTop.Height - (this.settings.IssueCount - 1) * this.issueControls.Last().Height;
+            for (int i = size / 2; i > 0; i--)
+            {
+                this.Top = extendedDisplay.WorkingArea.Top - (this.Size.Height / 2) + i;
+            }
+        }
+
+        private void FormSlideDown()
+        {
+            var primaryDisplay = Screen.AllScreens.ElementAtOrDefault(0);
+            var extendedDisplay = Screen.AllScreens.FirstOrDefault(s => s != primaryDisplay) ?? primaryDisplay;
+            for (int i = 0; i < this.Size.Height / 2; i++)
+            {
+                this.Top = extendedDisplay.WorkingArea.Top - (this.Size.Height / 2) + i;
+            }
+        }
+        //Mousre on form
+        void TheMouseMoved()
+        {
+            if (formOnTop && !mouseOnForm && !timerShow.Enabled)
+            {
+                FormSlideDown();
+                mouseOnForm = true;
+               // timerShow.Enabled = false;
+                //formOnTop = false;
+            }
+        }
+        //Mouse leave from form
+        void TheMouseLeave()
+        {
+            //if (!timerShow.Enabled)
+            //{
+            //    FormSlideUp();
+            //    timerShow.Enabled = true;
+            //    timerShow.Start();
+            //}
+             //mouseOnForm = false;
+        }
+
+        private void timerShow_Tick(object sender, EventArgs e)
+        {
+            timerShow.Enabled = false;
+            timerShow.Stop();
+            if (formOnTop && !mouseOnForm)
+            {
+                //FormSlideUp();
+                //mouseOnForm = false;
+            }
+
         }
     }
 
